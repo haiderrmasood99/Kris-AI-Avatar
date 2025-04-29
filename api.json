@@ -1,6 +1,6 @@
 {
-    "key": "aGFpZGVybWFzb29kMzEwQGdtYWlsLmNvbQ:9dPra1Q1Y6Iuf3jid284Q",
-    "openai_key": "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",
+    "key": "di-d key should be placed here",
+    "openai_key": "openai-api-key should be placed here",
     "url": "https://api.d-id.com",
     "model": "gpt-4o-mini",
     "voice_id": "en-US-ChristopherNeural"
