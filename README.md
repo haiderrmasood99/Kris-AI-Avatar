@@ -1,8 +1,8 @@
+
 # Streaming Live Demo by D-ID (tested 4/5/25)
 ## Please consider leaving as star :)
 
-https://youtu.be/VhSG-KOyQow
-![image](https://github.com/user-attachments/assets/ad8770be-aee8-435e-a0bf-c34839e07604)
+
 
 ## Initial Setup:
 * (install express) open a terminal in the folder:
@@ -36,11 +36,7 @@ https://youtu.be/VhSG-KOyQow
 * (connect) press connect you should see the connection ready 
 * (Enter Chat Text) press the start button to start streaming
 
-## Final Thoughts
-* Be patient and enjoy the puzzle if things are not working right away -- stay with it you will get it!
-* ChatGPT is your friend...  share the code and any errors and ask it for help
 
-![image](https://github.com/user-attachments/assets/c4a0dc9d-b0f7-495e-95d6-502f29ee8b91)
 
 ##
 ![image](https://github.com/user-attachments/assets/06c1dbc1-c30d-4397-b014-ae0fbc50b03c)
