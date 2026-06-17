@@ -1,301 +1,315 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>AI Video Agent Demo Kris</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kris AI Avatar</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
     <style>
+      :root {
+        color-scheme: dark;
+        --bg: #101114;
+        --panel: #191b20;
+        --panel-soft: #20242c;
+        --text: #f7f8fb;
+        --muted: #a9b0bd;
+        --accent: #43d9ad;
+        --accent-strong: #2fb68f;
+        --border: #303642;
+        --danger: #ff7474;
+      }
+
+      body.light-mode {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --panel: #ffffff;
+        --panel-soft: #eef2f7;
+        --text: #151922;
+        --muted: #566070;
+        --accent: #0b8f6b;
+        --accent-strong: #096e54;
+        --border: #d7dde8;
+        --danger: #b42318;
+      }
+
       * {
         box-sizing: border-box;
       }
 
       body {
-        background-color: #0f0f11;
-        color: #ffffff;
-        font-family: 'Mulish', sans-serif;
+        min-height: 100vh;
         margin: 0;
-        padding: 20px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
-      #content {
-        max-width: 860px;
+      main {
+        width: min(960px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 20px;
-        background: #1a1a1d;
-        border-radius: 20px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+        padding: 36px 0;
       }
 
-      .title {
-        text-align: center;
-        font-size: 28px;
-        margin-bottom: 30px;
-        color: #00eaff;
+      .shell {
+        display: grid;
+        grid-template-columns: minmax(280px, 380px) 1fr;
+        gap: 24px;
+        align-items: stretch;
       }
 
-      #video-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #222225;
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.05);
+      .stage,
+      .console {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
       }
 
-      #video-container {
-        width: 320px;
-        height: 320px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 6px solid #00eaff;
-        box-shadow: 0 0 20px rgba(0, 234, 255, 0.3);
+      .stage {
+        display: grid;
+        place-items: center;
+        padding: 28px;
+      }
+
+      .video-frame {
         position: relative;
-        background: linear-gradient(to bottom, #333, #444);
+        width: min(320px, 74vw);
+        aspect-ratio: 1;
+        overflow: hidden;
+        border-radius: 50%;
+        background: var(--panel-soft);
+        border: 4px solid var(--accent);
       }
 
       #idle-video,
       #talk-video {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        background-color: #000;
-        position: absolute;
-        top: 0;
-        left: 0;
+        background: #000;
       }
 
       #talk-video {
         display: none;
       }
 
+      .console {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        padding: 28px;
+      }
+
+      .title-block h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: 0;
+        line-height: 1;
+      }
+
+      .title-block p {
+        max-width: 58ch;
+        margin: 12px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      button {
+        min-height: 44px;
+        border: 0;
+        border-radius: 8px;
+        padding: 0 16px;
+        background: var(--panel-soft);
+        color: var(--text);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button.primary,
+      #connect-button.connected {
+        background: var(--accent);
+        color: #07110e;
+      }
+
+      button:hover:not(:disabled) {
+        filter: brightness(1.06);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      #connect-button.loading {
+        position: relative;
+        color: transparent;
+      }
+
+      #connect-button.loading::after,
+      #input-container.loading::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      #connect-button.loading::after {
+        top: 50%;
+        left: 50%;
+        color: #07110e;
+        transform: translate(-50%, -50%);
+      }
+
       #input-container {
         position: relative;
-        width: 100%;
-        margin-top: 20px;
       }
 
       #user-input-field {
         width: 100%;
-        padding: 14px 50px 14px 20px;
-        border-radius: 12px;
-        border: none;
-        background: #2b2b30;
-        color: white;
-        font-size: 16px;
-        outline: none;
+        min-height: 54px;
+        padding: 0 96px 0 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel-soft);
+        color: var(--text);
+        font: inherit;
+      }
+
+      #user-input-field:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
       }
 
       #enter-button {
         position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #00eaff;
-        cursor: pointer;
-        font-size: 22px;
-        padding: 5px;
-        transition: color 0.2s ease;
+        top: 5px;
+        right: 5px;
+        background: var(--accent);
+        color: #07110e;
       }
 
-      #enter-button:hover {
-        color: #66f6ff;
+      #input-container.loading::after {
+        top: 19px;
+        right: 78px;
+        color: var(--accent);
       }
 
-      #divider-line {
-        border: none;
-        height: 2px;
-        background: #333;
-        margin: 30px 0;
-        transition: background 0.3s ease;
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
       }
 
-      #divider-line:hover {
-        background: #00eaff;
-        height: 3px;
-      }
-
-      #buttons {
+      .status-item {
         display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 20px;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel-soft);
+        color: var(--muted);
+        font-size: 0.9rem;
       }
 
-      button {
-        padding: 14px 28px;
-        border-radius: 12px;
-        border: none;
-        font-size: 16px;
+      .status-value {
+        color: var(--text);
         font-weight: 700;
-        background-color: #00eaff;
-        color: #000;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        min-width: 120px;
-        box-shadow: 0 4px 12px rgba(0, 234, 255, 0.2);
-        position: relative;
       }
 
-      button:hover:not(:disabled) {
-        background-color: #66f6ff;
-        transform: translateY(-2px);
-        transition: background-color 0.2s ease, transform 0.2s ease;
+      #error-message {
+        margin: 0;
+        padding: 12px 14px;
+        border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+        border-radius: 8px;
+        color: var(--danger);
+        background: color-mix(in srgb, var(--danger) 12%, transparent);
       }
 
-      button:disabled {
-        background-color: #3a3a3a;
-        color: #777;
-        cursor: not-allowed;
+      #error-message[hidden] {
+        display: none;
       }
 
-      #connect-button.connected {
-        background-color: #00ff99 !important;
-        color: #000 !important;
-      }
-      
-      #connect-button.loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 16px;
-        height: 16px;
-        margin-top: -8px;
-        margin-left: -8px;
-        border: 2px solid #000;
-        border-top: 2px solid transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
+      @keyframes spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
       }
 
-      #connect-button.loading {
-        color: transparent !important;
+      @media (max-width: 760px) {
+        main {
+          width: min(100% - 20px, 520px);
+          padding: 10px 0;
+        }
+
+        .shell {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .stage,
+        .console {
+          padding: 18px;
+        }
       }
-
-    /* Add a loading animation to the connect button */
-    #connect-button.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 16px;
-      height: 16px;
-      margin-top: -8px;
-      margin-left: -8px;
-      border: 2px solid #000;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    /* Improve button hover effects */
-    button:hover:not(:disabled) {
-      background-color: #66f6ff;
-      transform: translateY(-2px);
-      transition: background-color 0.2s ease, transform 0.2s ease;
-    }
-
-    /* Enhance video container styles */
-    #video-container {
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 6px solid #00eaff;
-      box-shadow: 0 0 20px rgba(0, 234, 255, 0.3);
-      background: linear-gradient(to bottom, #333, #444);
-    }
-
-    /* Add a focus effect to the input field */
-    #user-input-field:focus {
-      outline: none;
-      box-shadow: 0 0 10px rgba(0, 234, 255, 0.5);
-    }
-
-    /* Define the light theme */
-    :root {
-      --background-color: #ffffff;
-      --text-color: #000000;
-    }
-
-    /* Define the dark theme */
-    .dark-mode {
-      --background-color: #0f0f11;
-      --text-color: #ffffff;
-    }
-
-    /* Apply the theme styles */
-    body {
-      background-color: var(--background-color);
-      color: var(--text-color);
-    }
-
-    #input-container.loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(0, 0, 0, 0.1);
-      border-top: 3px solid #00eaff;
-      border-radius: 50%;
-      animation: spinner-border 0.75s linear infinite;
-    }
-
-    @keyframes spinner-border {
-      100% {
-        transform: translateX(-50%) rotate(360deg);
-      }
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .hidden-audio {
-      display: none;
-    }  
-
     </style>
   </head>
-
   <body>
-    <div id="content">
-      <h1 class="title">Kris AI Video Agent Demo</h1>
+    <main>
+      <div class="shell">
+        <section class="stage" aria-label="Avatar video">
+          <div class="video-frame">
+            <video id="idle-video" src="./oracle_Idle.mp4" autoplay muted loop playsinline></video>
+            <video id="talk-video" autoplay playsinline></video>
+          </div>
+        </section>
 
-      <div id="video-wrapper">
-        <div id="video-container">
-          <video id="idle-video" src="./oracle_Idle.mp4" autoplay muted loop playsinline></video>
-          <video id="talk-video" autoplay playsinline></video>
-        </div>
+        <section class="console" aria-label="Avatar controls">
+          <div class="title-block">
+            <h1>Kris AI Avatar</h1>
+            <p>Connect to the D-ID stream, ask a question, and let the avatar speak the OpenAI response.</p>
+          </div>
+
+          <p id="error-message" hidden></p>
+
+          <div id="input-container">
+            <input type="text" id="user-input-field" placeholder="Ask Kris anything" autocomplete="off" />
+            <button id="enter-button" class="primary" type="button">Send</button>
+          </div>
+
+          <div class="controls">
+            <button id="connect-button" class="primary" type="button">Connect</button>
+            <button id="destroy-button" type="button" disabled>Disconnect</button>
+            <button id="theme-toggle" type="button">Theme</button>
+          </div>
+
+          <div class="status-grid" aria-label="Connection status">
+            <div class="status-item"><span>Peer</span><span id="peer-status-label" class="status-value">disconnected</span></div>
+            <div class="status-item"><span>ICE</span><span id="ice-status-label" class="status-value">disconnected</span></div>
+            <div class="status-item"><span>Signaling</span><span id="signaling-status-label" class="status-value">stable</span></div>
+            <div class="status-item"><span>Stream</span><span id="streaming-status-label" class="status-value">disconnected</span></div>
+          </div>
+        </section>
       </div>
+    </main>
 
-      <div id="input-container">
-        <input type="text" id="user-input-field" placeholder="Ask me anything...">
-        <button id="enter-button" title="Send message">↵</button>
-      </div>
-
-      <hr id="divider-line">
-
-      <div id="buttons">
-        <button id="connect-button" type="button">Connect</button>
-        <button id="destroy-button" type="button" disabled>Disconnect</button>
-        <button id="theme-toggle">Toggle Theme</button>
-      </div>
-    </div>
-
-    <audio id="audio-element" class="hidden-audio" autoplay></audio>
     <script type="module" src="./streaming-client-api.js"></script>
   </body>
 </html>

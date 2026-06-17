@@ -1,34 +1,38 @@
-const config = require('./api.json');
+const fs = require('fs');
+const fetch = require('node-fetch');
 
-const openai_key = config.openai_key;
-const OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+function loadConfig() {
+  if (!fs.existsSync('api.json')) {
+    throw new Error('Missing api.json. Copy api.example.json to api.json first.');
+  }
 
-async function main() {
-    const fetch = await import('node-fetch').then(module => module.default);
-
-    async function fetchOpenAIResponse(prompt) {
-        const response = await fetch(OPENAI_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${openai_key}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: "gpt-4o-mini",
-                messages: [{"role": "user", "content": prompt}],
-                temperature: 0.7
-            }),
-        });
-
-        const data = await response.json();
-        return data.choices[0].message.content.trim();  
-    }
-
-    const userInput = "Who is the CEO of Tesla?";
-    const openAIResponse = await fetchOpenAIResponse(userInput);
-
-    console.log("User Input:", userInput);
-    console.log("OpenAI Response:", openAIResponse);
+  return JSON.parse(fs.readFileSync('api.json', 'utf8'));
 }
 
-main().catch(error => console.error(error));
+async function main() {
+  const config = loadConfig();
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${config.openai_key}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: config.model || 'gpt-4o-mini',
+      messages: [{ role: 'user', content: 'Reply with one short sentence.' }],
+      max_tokens: 40,
+    }),
+  });
+
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.error?.message || 'OpenAI test failed.');
+  }
+
+  console.log('OpenAI response:', payload.choices[0].message.content.trim());
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

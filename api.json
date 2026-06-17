@@ -1,7 +1,0 @@
-{
-    "key": "di-d key should be placed here",
-    "openai_key": "openai-api-key should be placed here",
-    "url": "https://api.d-id.com",
-    "model": "gpt-4o-mini",
-    "voice_id": "en-US-ChristopherNeural"
-}

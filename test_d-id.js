@@ -1,38 +1,35 @@
-const fetch = require('node-fetch');
-const base64 = require('base-64');
 const fs = require('fs');
+const fetch = require('node-fetch');
 
-async function getDidCredits(apiKey) {
-  const url = "https://api.d-id.com/credits";
-  const authString = apiKey + ":";
-  const base64AuthString = base64.encode(authString);
+function loadConfig() {
+  if (!fs.existsSync('api.json')) {
+    throw new Error('Missing api.json. Copy api.example.json to api.json first.');
+  }
 
-  const headers = {
-    "accept": "application/json",
-    "Authorization": `Basic ${base64AuthString}`
-  };
-
-  const response = await fetch(url, { headers });
-  const data = await response.json();
-  return data;
+  return JSON.parse(fs.readFileSync('api.json', 'utf8'));
 }
 
 async function main() {
-  try {
-    // Read the API key from api.json file
-    const apiKeyJson = JSON.parse(fs.readFileSync('api.json', 'utf8'));
-    const apiKey = apiKeyJson.key;
+  const config = loadConfig();
+  const response = await fetch(`${config.url || 'https://api.d-id.com'}/credits`, {
+    headers: {
+      accept: 'application/json',
+      authorization: `Basic ${Buffer.from(`${config.key}:`).toString('base64')}`,
+    },
+  });
 
-    const didCredits = await getDidCredits(apiKey);
-    // Extracting just the 'remaining' and 'total' values
-    const creditsSummary = {
-      remaining: didCredits.remaining,
-      total: didCredits.total
-    };
-    console.log("Credits Summary:", creditsSummary);
-  } catch (error) {
-    console.error("Error:", error);
+  const payload = await response.json();
+  if (!response.ok) {
+    throw new Error(payload.message || payload.description || 'D-ID credit check failed.');
   }
+
+  console.log('D-ID credits:', {
+    remaining: payload.remaining,
+    total: payload.total,
+  });
 }
 
-main();
+main().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

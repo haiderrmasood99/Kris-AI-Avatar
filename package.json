@@ -1,11 +1,19 @@
 {
-  "dependencies": {
-    "base-64": "^1.0.0",
-    "express": "^4.21.2",
-    "node-fetch": "^2.7.0",
-    "openai": "^4.94.0"
-  },
+  "name": "kris-ai-avatar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Express demo for a D-ID streaming avatar powered by OpenAI responses.",
   "scripts": {
-    "dev": "node app.js"
+    "start": "node app.js",
+    "dev": "node app.js",
+    "test:did": "node test_d-id.js",
+    "test:openai": "node test_openai.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "node-fetch": "^2.7.0"
   }
 }

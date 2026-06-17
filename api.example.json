@@ -1,0 +1,9 @@
+{
+  "key": "did_api_key_here",
+  "openai_key": "openai_api_key_here",
+  "url": "https://api.d-id.com",
+  "model": "gpt-4o-mini",
+  "voice_id": "en-US-ChristopherNeural",
+  "source_url": "https://raw.githubusercontent.com/haiderrmasood99/Kris-AI-Avatar/main/oracle_pic.jpg",
+  "driver_url": "bank://lively/"
+}
